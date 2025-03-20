@@ -1,0 +1,12 @@
+--pre
+--extra-index-url https://download.pytorch.org/whl/nightly/cu128
+torch
+torchvision
+torchaudio
+openai-whisper
+fastapi
+uvicorn
+gradio==5.22.0
+python-dotenv
+sse-starlette
+ffmpeg-python
