@@ -1,5 +1,6 @@
 import ctypes
 
+import torch.cuda
 import whisper
 from whisper.utils import get_writer
 from utils.log_capture import LogCapture
@@ -26,8 +27,19 @@ class TranscriptionProcessor:
         self.lock = threading.Lock()
 
     def load_model(self, model_name):
-        if model_name not in self.model_cache:
-            self.model_cache[model_name] = whisper.load_model(model_name)
+        # 如果已经是当前模型，直接返回
+        if model_name in self.model_cache:
+            return self.model_cache[model_name]
+
+        # 释放旧模型的显存
+        if self.model_cache:
+            old_model_name = next(iter(self.model_cache.keys()))
+            old_model = self.model_cache.pop(old_model_name)  # 删除引用
+            del old_model
+            torch.cuda.empty_cache()  # 显式释放显存
+
+        # 加载新模型
+        self.model_cache[model_name] = whisper.load_model(model_name)
         return self.model_cache[model_name]
 
     def start_transcription(self, filepath, model_name, language, task, output_formats):

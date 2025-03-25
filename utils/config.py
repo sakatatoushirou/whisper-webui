@@ -18,7 +18,7 @@ class Config:
         ("Deutsch", "de"),
         ("Español", "es")
     ]
-    DEFAULT_LANGUAGE = "Automatic Detection"
+    DEFAULT_LANGUAGE = None
 
     # 输出设置
     OUTPUT_FORMATS = ["txt", "srt", "vtt", "tsv", "json"]
@@ -26,7 +26,7 @@ class Config:
     TEMP_DIR = os.getenv("TEMP_DIR", "/tmp/whisper_output")
 
     # 服务器设置
-    SERVER_HOST = "127.0.0.1"
+    SERVER_HOST = "0.0.0.0"
     SERVER_PORT = 7860
     # 队列设置
     MAX_QUEUE_SIZE = 2  # 同时处理的最大任务数
