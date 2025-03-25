@@ -1,9 +1,9 @@
-from ui import create_interface
-from transcribe_module import TranscribeProcessor
-from config import settings  # 新增导入
+from webui.ui import create_interface
+from transcribe.transcribe_module import TranscriptionProcessor
+from utils.config import settings  # 新增导入
 
 if __name__ == "__main__":
-    processor = TranscribeProcessor()
+    processor = TranscriptionProcessor()
     app = create_interface(processor)
 
     # 正确的队列参数设置方式
@@ -13,5 +13,5 @@ if __name__ == "__main__":
         server_name=settings.SERVER_HOST,
         server_port=settings.SERVER_PORT,
         show_api=False,
-        show_error=True
+        show_error=True,
     )

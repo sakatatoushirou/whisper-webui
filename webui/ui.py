@@ -1,6 +1,6 @@
 import gradio as gr
-from utils import preview_media
-from config import settings  # 新增导入
+from utils.utils import preview_media
+from utils.config import settings  # 新增导入
 
 
 def create_interface(processor):
@@ -16,8 +16,6 @@ def create_interface(processor):
                     file_types=["audio", "video"],
                     interactive=True
                 )
-                # 增加错误提示组件
-                error_box = gr.Textbox(visible=False, label="Error Message")
                 preview = gr.Video(visible=False, label="Media Preview")
                 model_selector = gr.Dropdown(
                     choices=settings.MODEL_OPTIONS,  # 使用配置
@@ -40,10 +38,11 @@ def create_interface(processor):
                     label="Output Formats"
                 )
                 submit_btn = gr.Button("Transcribe", variant="primary")
+                stop_btn = gr.Button("强制停止", variant="stop", visible=False)
 
             with gr.Column():
                 logs = gr.Textbox(label="Processing Logs", lines=15, interactive=False)
-                output_text = gr.Textbox(label="Transcript", lines=15,visible=False)
+                output_text = gr.Textbox(label="Transcript", lines=15, visible=False)
                 download_section = gr.Files(
                     label="Downloads",
                     visible=True,  # 初始设为可见
@@ -61,10 +60,20 @@ def create_interface(processor):
             lambda: gr.Video(visible=False),
             outputs=preview
         )
-        submit_btn.click(
-            processor.process_transcription,
-            inputs=[input_media, model_selector, language, task_type, output_formats],
-            outputs=[output_text, download_section, logs]  # 保持顺序对应
-        )
 
+        submit_btn.click(
+            fn=lambda: [gr.Button(visible=False), gr.Button(visible=True)],  # 先切换按钮状态
+            outputs=[submit_btn, stop_btn]
+        ).then(
+            fn=processor.process_transcription,  # 再执行主要处理
+            inputs=[input_media, model_selector, language, task_type, output_formats],
+            outputs=[output_text, download_section, logs, submit_btn, stop_btn]
+        )
+        stop_btn.click(
+            fn=processor.stop_transcription,
+            outputs=[logs]
+        ).then(
+            lambda: [gr.Button(visible=True), gr.Button(visible=False)],  # 停止后恢复按钮
+            outputs=[submit_btn, stop_btn]
+        )
     return interface
